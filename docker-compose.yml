@@ -1,0 +1,51 @@
+
+services:
+  # Service untuk PHP dan Composer
+  app:
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+    container_name: php_app
+    working_dir: /var/www/html
+    volumes:
+      - ./wisatamaluku:/var/www/html
+    ports:
+      - "5173:5173"
+    networks:
+      - laravel_network
+
+  # Service untuk Nginx
+  webserver:
+    image: nginx:latest
+    container_name: nginx_web
+    ports:
+      - "80:80"
+    volumes:
+      - ./wisatamaluku:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - laravel_network
+
+  # Service untuk MySQL
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wisatamaluku
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel_network
+    volumes:
+      - db_data:/var/lib/mysql
+
+networks:
+  laravel_network:
+
+volumes:
+  db_data:
